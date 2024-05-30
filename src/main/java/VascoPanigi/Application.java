@@ -4,10 +4,12 @@ import VascoPanigi.entities.Customer;
 import VascoPanigi.entities.Order;
 import VascoPanigi.entities.Product;
 import VascoPanigi.enums.Categories;
+import com.github.javafaker.Faker;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.function.Supplier;
 
@@ -15,20 +17,22 @@ public class Application {
 
     public static void main(String[] args) {
 
-//        --------------------------------ex 1---------------------------
+//        -------------------------------- product creation---------------------------------------------------
 
         List<Product> productList = getProducts();
 
-        System.out.println(productList);
+        System.out.println("Products: \n" + productList);
+        System.out.println();
 
 
-//        --------------------------------ex 2---------------------------
+//        --------------------------------filter products by category and price -----------------------------
         List<Product> booksList = productList.stream()
-                .filter(product -> product.getCategory().equals(Categories.BOOKS))
+                .filter(product -> product.getCategory().equals(Categories.BOOKS) && product.getPrice() > 100)
                 .toList();
-        System.out.println(booksList);
+        System.out.println("Book list: \n" + booksList);
+        System.out.println();
 
-        //        --------------------------------ex 3---------------------------
+        //        ------------------------filter products by category and apply discount ---------------------------
 
         List<Product> boysProductList = productList.stream()
                 .filter(product -> product.getCategory().equals(Categories.BOYS))
@@ -38,25 +42,30 @@ public class Application {
                 }).
                 toList();
 
-        System.out.println(boysProductList);
+        System.out.println("Boys products: \n" + boysProductList);
+        System.out.println();
 
-        //        --------------------------------ex 4---------------------------
+
+        //        ---------------create customers, create orders and filter orders by customer's tier---------------------------
 
 
         List<Customer> customersList = getCustomersList();
 
-        System.out.println(customersList);
+        System.out.println("Customers: \n" + customersList);
+        System.out.println();
 
         List<Order> orderList = placeOrders(customersList, productList);
-        System.out.println("ORDERS: " + orderList);
+        System.out.println("Order: \n" + orderList);
+        System.out.println();
 
 
         List<Product> productListFilteredByTierAndDate = getSpecificTierOrderList(orderList);
-        System.out.println("TIER 2 ORDERS: " + productListFilteredByTierAndDate);
+        System.out.println("Tier 2 orders: \n" + productListFilteredByTierAndDate);
+        System.out.println();
 
     }
 
-    //        --------------------------------ex 1 method---------------------------
+    //        -------------------------------- methods---------------------------
 
     private static List<Product> getProducts() {
         Random random = new Random();
@@ -72,9 +81,7 @@ public class Application {
 
         for (int i = 0; i < 100; i++) {
             Product newProduct = productSupplier.get();
-            if (newProduct.getPrice() > 100) {
-                productList.add(newProduct);
-            }
+            productList.add(newProduct);
         }
         return productList;
     }
@@ -101,13 +108,15 @@ public class Application {
 
     public static List<Customer> getCustomersList() {
         Random random = new Random();
+        Faker faker = new Faker(Locale.ENGLISH);
+
 
         Supplier<Long> randomIdSupplier = () -> random.nextLong(10000, 20000);
         Supplier<Integer> randomTierSupplier = () -> random.nextInt(1, 3);
 
         List<Customer> customersList = new ArrayList<>();
 
-        Supplier<Customer> customerSupplier = () -> new Customer(randomIdSupplier.get(), randomTierSupplier.get(), "pippo");
+        Supplier<Customer> customerSupplier = () -> new Customer(randomIdSupplier.get(), randomTierSupplier.get(), faker.gameOfThrones().character());
 
         for (int i = 0; i < 100; i++) {
             Customer newCustomer = customerSupplier.get();
