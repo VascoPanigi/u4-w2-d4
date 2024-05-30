@@ -7,11 +7,9 @@ import VascoPanigi.enums.Categories;
 import com.github.javafaker.Faker;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Application {
 
@@ -54,6 +52,7 @@ public class Application {
         System.out.println("Customers: \n" + customersList);
         System.out.println();
 
+
         List<Order> orderList = placeOrders(customersList, productList);
         System.out.println("Order: \n" + orderList);
         System.out.println();
@@ -63,12 +62,53 @@ public class Application {
         System.out.println("Tier 2 orders: \n" + productListFilteredByTierAndDate);
         System.out.println();
 
+
+//        TODO 1: Raggruppare gli ordini per cliente utilizzando Stream e Lambda Expressions.
+//         Crea una mappa in cui la chiave è il cliente e il valore è una lista di ordini
+//         effettuati da quel cliente
+
+        //        ---------------filter orders by client---------------------------
+
+        Map<Customer, List<Order>> ordersByCustomer = orderList.stream().collect(Collectors.groupingBy(Order::getCustomer));
+
+        System.out.println("Orders filtered per customer: \n" + ordersByCustomer);
+        System.out.println();
+
+//        TODO 2: Dato un elenco di ordini, calcola il totale delle vendite per ogni cliente
+//         utilizzando Stream e Lambda Expressions.
+//         Crea una mappa in cui la chiave è il cliente e il valore è l'importo totale dei suoi acquisti
+
+        Map<Customer, Double> totalOrderByCustomer = orderList.stream().collect(Collectors.groupingBy(Order::getCustomer, Collectors.summingDouble(Order::getTotal)));
+
+        System.out.println("Total price order per customer: \n" + totalOrderByCustomer);
+        System.out.println();
+
+//        TODO 3: Dato un elenco di prodotti, trova i prodotti più costosi utilizzando Stream e Lambda Expressions
+
+        List<Product> mostExpensiveProducts = productList.stream().sorted(Comparator.comparing(Product::getPrice).reversed()).limit(5).toList();
+        System.out.println("Most 5 expensive products \n" + mostExpensiveProducts);
+        System.out.println();
+
+//        TODO 4: Dato un elenco di ordini, calcola la media degli importi degli ordini utilizzando Stream e Lambda Expressions
+        
+//        TODO 5: Dato un elenco di prodotti, raggruppa i prodotti per categoria e calcola la somma degli importi per ogni categoria
+//         utilizzando Stream e Lambda Expressions.
+
+//        TODO 6: Usando la classe Apache Commons IO FileUtils implementare un metodo salvaProdottiSuDisco che salvi su disco un
+//         file contenente la lista dei prodotti. Utilizzare un formato simile al seguente per storicizzare i dati su file:
+//         nomeprodotto1@categoriaprodotto1@prezzoprodotto1#nomeprodotto2@categoriaprodotto2@prezzoprodotto2
+
+//        TODO 7: Sempre usando la classe Apache Commons IO FileUtils implementare un metodo leggiProdottiDaDisco che riempia un
+//         ArrayList con il contenuto del file salvato al punto 6
+
+
     }
 
     //        -------------------------------- methods---------------------------
 
     private static List<Product> getProducts() {
         Random random = new Random();
+        Faker faker = new Faker(Locale.ENGLISH);
 
         Supplier<Double> randomPriceSupplier = () -> random.nextDouble(1, 300);
 
@@ -77,7 +117,7 @@ public class Application {
 
         List<Product> productList = new ArrayList<>();
 
-        Supplier<Product> productSupplier = () -> new Product(randomIdSupplier.get(), "Hello, I'm a book :D", randomCategory(), randomPriceSupplier.get());
+        Supplier<Product> productSupplier = () -> new Product(randomIdSupplier.get(), faker.book().title(), randomCategory(), randomPriceSupplier.get());
 
         for (int i = 0; i < 100; i++) {
             Product newProduct = productSupplier.get();
@@ -136,14 +176,13 @@ public class Application {
         Supplier<Integer> randomLengthSupplier = () -> random.nextInt(1, 6);
         Supplier<Integer> randomProductIndexSupplier = () -> random.nextInt(0, 50);
 
-        List<Product> currentClientProductList = new ArrayList<>();
-
-        for (int i = 0; i < randomLengthSupplier.get(); i++) {
-            currentClientProductList.add(productList.get(randomProductIndexSupplier.get()));
-        }
 
         List<Order> orderList = new ArrayList<>();
         for (Customer currentCustomer : customersList) {
+            List<Product> currentClientProductList = new ArrayList<>();
+            for (int i = 0; i < randomLengthSupplier.get(); i++) {
+                currentClientProductList.add(productList.get(randomProductIndexSupplier.get()));
+            }
             Order currentOrder = new Order(randomIdSupplier.get(), currentClientProductList, currentCustomer);
             orderList.add(currentOrder);
         }
